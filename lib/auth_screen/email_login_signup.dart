@@ -77,7 +77,9 @@ class _SignupEmailState extends State<SignupEmail> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
       appBar: AppBar(
+        elevation: 0,
         title: Image.asset(
           'lib/assets/Appco__1_-removebg-preview.png',
           scale: 2.6,
@@ -238,7 +240,8 @@ class _SignupEmailState extends State<SignupEmail> {
             EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       ),
       bottomNavigationBar: BottomAppBar(
-        color: const Color(0xFFEFF7F6),
+        color: Colors.transparent,
+        elevation: 0,
         child: Container(
           height: 70,
           decoration: const BoxDecoration(
