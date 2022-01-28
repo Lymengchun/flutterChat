@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class OwnMessageCard extends StatelessWidget {
@@ -14,6 +13,13 @@ class OwnMessageCard extends StatelessWidget {
         ),
         child: Card(
           margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+            topRight: Radius.circular(15),
+            bottomRight: Radius.circular(0),
+            topLeft: Radius.circular(15),
+            bottomLeft: Radius.circular(15),
+          )),
           color: const Color(0xFFB2F7EF),
           child: Stack(
             children: [

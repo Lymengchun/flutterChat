@@ -1,34 +1,57 @@
-import 'package:chattah/screen/own_bubble_message_box.dart';
+import 'package:chattah/auth_screen/FB_login_screen.dart';
+import 'package:chattah/screens/own_message_card.dart';
+import 'package:chattah/screens/reply_bubble_card.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({Key? key}) : super(key: key);
-
+  const ChatScreen({Key? key, required this.name, required this.icon})
+      : super(key: key);
+  final String name;
+  final String icon;
   @override
-  _ChatScreenState createState() => _ChatScreenState();
+  // ignore: no_logic_in_create_state
+  _ChatScreenState createState() => _ChatScreenState(name, icon);
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  String name;
+  String icon;
   String currentMenuItem = 'About';
   bool isLoading = true;
   late IO.Socket socket;
+
+  final myController = TextEditingController();
+
+  _ChatScreenState(this.name, this.icon);
 //init state
   @override
   void initState() {
+    connect();
     super.initState();
+  }
+
+//textfield controller
+  @override
+  void dispose() {
+    myController.dispose();
+    super.dispose();
+  }
+
+//Connect socket.io
+  void connect() {
     socket = IO.io(
-        'https://photosharebackendnodejs.herokuapp.com/',
+        'https://chattahbackend.herokuapp.com/',
         IO.OptionBuilder()
             .setTransports(['websocket'])
             .disableAutoConnect()
             .build());
     socket.connect();
-    socket.emit('test', 'Hello Wolrd');
-    super.initState();
-    // _loadData();
+    print(socket.connected);
+
+    socket.emit('test', 'Hello world');
+
+    socket.on('test', (data) => print(data));
   }
 
 //Build screen
@@ -55,25 +78,27 @@ class _ChatScreenState extends State<ChatScreen> {
             fit: BoxFit.cover,
           ),
           ListView(
+            padding: const EdgeInsets.only(bottom: 55),
             children: const [
               OwnMessageCard(),
+              ReplyBubbleCard(),
               OwnMessageCard(),
               OwnMessageCard(),
               OwnMessageCard(),
               OwnMessageCard(),
+              ReplyBubbleCard(),
+              OwnMessageCard(),
+              OwnMessageCard(),
+              ReplyBubbleCard(),
+              OwnMessageCard(),
+              ReplyBubbleCard(),
+              OwnMessageCard(),
+              ReplyBubbleCard(),
               OwnMessageCard(),
               OwnMessageCard(),
               OwnMessageCard(),
               OwnMessageCard(),
-              OwnMessageCard(),
-              OwnMessageCard(),
-              OwnMessageCard(),
-              OwnMessageCard(),
-              OwnMessageCard(),
-              OwnMessageCard(),
-              OwnMessageCard(),
-              OwnMessageCard(),
-              OwnMessageCard(),
+              ReplyBubbleCard(),
               OwnMessageCard(),
               OwnMessageCard(),
             ],
@@ -86,7 +111,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 Container(
                   width: MediaQuery.of(context).size.width - 55,
                   child: Card(
-                    margin: const EdgeInsets.only(left: 10, right: 10),
+                    margin: const EdgeInsets.only(left: 3, right: 10),
                     shadowColor: Colors.black12,
                     child: TextFormField(
                       decoration: const InputDecoration(
@@ -94,18 +119,28 @@ class _ChatScreenState extends State<ChatScreen> {
                         hintText: "Type a message",
                         border: InputBorder.none,
                       ),
+                      keyboardType: TextInputType.multiline,
+                      maxLines: 3,
+                      minLines: 1,
+                      controller: myController,
                     ),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20)),
                   ),
                 ),
 
-                const Padding(
-                  padding: EdgeInsets.all(6.0),
-                  child: CircleAvatar(
+                //send button
+                InkWell(
+                  onTap: () {
+                    socket.emit("message", myController.text);
+                    myController.clear();
+                  },
+                  child: const CircleAvatar(
+                    radius: 25,
                     child: Icon(
                       Icons.send,
                       color: Colors.white,
+                      size: 30,
                     ),
                   ),
                 ),
@@ -126,20 +161,20 @@ class _ChatScreenState extends State<ChatScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           CircleAvatar(
-            child: SvgPicture.asset(
-              'lib/assets/profile.svg',
-              height: 50,
-              width: 50,
-            ),
-          ),
+              radius: 25,
+              backgroundColor: Colors.white,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(50),
+                child: Image.asset(icon),
+              )),
         ],
       ),
       title: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
-          Text("Lymeng"),
-          Text(
+        children: [
+          Text(name),
+          const Text(
             "Active",
             style: TextStyle(fontSize: 14),
           )
@@ -151,26 +186,22 @@ class _ChatScreenState extends State<ChatScreen> {
             itemBuilder: (BuildContext contesxt) {
               return [
                 const PopupMenuItem(
-                  child: Text("New group"),
-                  value: "New group",
+                  child: Text("Delete chat"),
+                  value: "Delete chat",
                 ),
-                const PopupMenuItem(
-                  child: Text("Logout"),
-                  value: "Logout",
-                )
               ];
             })
       ],
     );
   }
 
-// load Data
-  void _loadData() {
-    // Delay 2 seconds
-    Future.delayed(const Duration(seconds: 2)).then((value) {
-      setState(() {
-        isLoading = false;
-      });
-    });
-  }
+// // load Data
+//   void _loadData() {
+//     // Delay 2 seconds
+//     Future.delayed(const Duration(seconds: 2)).then((value) {
+//       setState(() {
+//         isLoading = false;
+//       });
+//     });
+//   }
 }

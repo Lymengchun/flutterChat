@@ -1,11 +1,17 @@
+import 'package:chattah/pages/chat_page.dart';
+import 'package:chattah/pages/user_page.dart';
+import 'package:chattah/screens/drawer_widget.dart';
+import 'package:chattah/auth_screen/FB_login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
-
+  const HomeScreen({Key? key, required this.userObj}) : super(key: key);
+  final Map userObj;
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  // ignore: no_logic_in_create_state
+  _HomeScreenState createState() => _HomeScreenState(userObj);
 }
 
 class _HomeScreenState extends State<HomeScreen>
@@ -13,9 +19,11 @@ class _HomeScreenState extends State<HomeScreen>
   Color primaryColor = const Color(0xFF010B41);
   Color secondaryColor = const Color(0xFF7BDFF2);
   late TabController _controller;
+  Map userObj;
+
+  _HomeScreenState(this.userObj);
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _controller = TabController(length: 2, vsync: this, initialIndex: 0);
   }
@@ -25,8 +33,9 @@ class _HomeScreenState extends State<HomeScreen>
     return Scaffold(
       appBar: AppBar(
           title: const Text(
-            'ChatTah',
-            style: TextStyle(fontSize: 25, color: Colors.white),
+            'CHAT TAH',
+            style: TextStyle(
+                fontSize: 25, color: Colors.white, fontWeight: FontWeight.bold),
           ),
           actions: [
             IconButton(
@@ -43,9 +52,19 @@ class _HomeScreenState extends State<HomeScreen>
                   child: Text("New Group"),
                   value: "New Group",
                 ),
-                const PopupMenuItem(
-                  child: Text("Logout"),
+                PopupMenuItem(
+                  onTap: () {},
+                  child: const Text("Profile"),
+                  value: "Profile",
+                ),
+                PopupMenuItem(
+                  child: const Text("Logout"),
                   value: "Logout",
+                  onTap: () {
+                    FacebookAuth.instance.logOut().then((value) {
+                      Navigator.pop(context);
+                    });
+                  },
                 ),
               ];
             }),
@@ -64,8 +83,9 @@ class _HomeScreenState extends State<HomeScreen>
           )),
       body: TabBarView(
         controller: _controller,
-        children: const [Text("Chats"), Text("Users")],
+        children: const [Chatpage(), Userpage()],
       ),
+      drawer: const DrawerWidget(),
     );
   }
 }
