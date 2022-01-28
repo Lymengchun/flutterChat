@@ -2,7 +2,7 @@ import 'package:chattah/auth_screen/email_login_signin.dart';
 import 'package:chattah/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:async';
+import 'dart:convert';
 
 class SignupEmail extends StatefulWidget {
   const SignupEmail({Key? key}) : super(key: key);
@@ -21,10 +21,14 @@ class _SignupEmailState extends State<SignupEmail> {
   bool isEmailError = false;
   Map<String, int> userObj = {};
   final _key = GlobalKey<FormState>();
+
+  late Map data;
+  late String message;
   @override
   void initState() {
     super.initState();
   }
+
 
 
 
@@ -35,18 +39,22 @@ class _SignupEmailState extends State<SignupEmail> {
         "name": nameController.text,
         "email": emailController.text,
         "password": passwordController.text
-      }).then((value) {
+      });
+
+       data = json.decode(Response.body);
+      setState(() {
+        message = data["message"];
+      });
+      if (message =='Email is already taken!') {
+        isEmailError = true;
+      }else if(message =='User Added Successfully!'){
         Navigator.push(
             context,
             MaterialPageRoute(
                 builder: (context) => HomeScreen(userObj: userObj)));
-    
-      });
-      if (Response.body ==
-          '{"message":"Email is already taken!","error":11000}') {
-        isEmailError = true;
+      }else{
+        print(message);
       }
-
       print(Response.body);
     } catch (err) {
       print(err);
@@ -132,6 +140,7 @@ class _SignupEmailState extends State<SignupEmail> {
                       margin: const EdgeInsets.only(
                           left: 40, right: 40, bottom: 20),
                       child: TextFormField(
+                        onTap: ()=>isEmailError = false,
                         validator: (value) {
                           if (value!.isEmpty) {
                             return "Email can not be empty!";

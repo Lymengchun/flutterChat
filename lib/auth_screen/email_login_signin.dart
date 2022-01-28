@@ -3,7 +3,7 @@ import 'package:chattah/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:form_field_validator/form_field_validator.dart';
-
+import 'dart:convert';
 class SignInEmail extends StatefulWidget {
   const SignInEmail({ Key? key }) : super(key: key);
 
@@ -22,6 +22,9 @@ class _SignInEmailState extends State<SignInEmail> {
   Map<String, int> userObj = {};
   final _key = GlobalKey<FormState>();
 
+  late Map data;
+  late String message;
+
   void _togglePassword() {
     setState(() {
       //if isHidepassword true will go false if false will go true
@@ -30,25 +33,36 @@ class _SignInEmailState extends State<SignInEmail> {
   }
 
     void postSignInData() async {
+   
+
     try {
 
       final Response = await http.post(Uri.parse(url), body: {
         "username": emailController.text,
         "password": passwordController.text
       });
-      if (Response.body == '{"message":"Password does not matched!"}') {
+
+      data = json.decode(Response.body);
+      setState(() {
+        message = data["message"];
+      });
+
+      if (message == 'Password does not matched!') {
         isPasswordNotMatch = true;
-      }else if(Response.body == '{"message":"No user found!"}'){
+      }else if(message == 'No user found!'){
         isEmailError = true;
-      }else{
+      }else if(message == 'Login Successful!'){
         Navigator.push(
             context,
             MaterialPageRoute(
                 builder: (context) => HomeScreen(userObj: userObj)));
-
+            passwordController.clear();
+      }else{
+        print(message);
       }
    
       print(Response.body);
+
     } catch (err) {
       print(err);
     }
@@ -57,7 +71,7 @@ class _SignInEmailState extends State<SignInEmail> {
       print("Your data is submitted");
           
     }
-    passwordController.clear();
+
   }
 
   @override
@@ -138,6 +152,7 @@ class _SignInEmailState extends State<SignInEmail> {
                       margin: const EdgeInsets.only(
                           left: 40, right: 40, bottom: 20),
                       child: TextFormField(
+                        onTap: () => isPasswordNotMatch = false,
                         validator: (value) {
                           if (value!.isEmpty) {
                             return "password can not be empty!";
