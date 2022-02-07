@@ -1,9 +1,11 @@
 import 'package:chattah/auth_screen/email_login_signin.dart';
 import 'package:chattah/auth_screen/email_login_signup.dart';
 import 'package:chattah/auth_screen/FB_login_screen.dart';
+import 'package:chattah/shared/loading.dart';
 import 'package:flutter/material.dart';
 
 void main() {
+
   runApp(const MyApp());
 }
 
@@ -23,7 +25,7 @@ class MyApp extends StatelessWidget {
           textTheme: const TextTheme(
               bodyText1: TextStyle(fontSize: 12, color: Color(0xFFEFF7F6)))),
       home: const SignInEmail(),
-      debugShowCheckedModeBanner: false,
+      debugShowCheckedModeBanner: true,
     );
   }
 }

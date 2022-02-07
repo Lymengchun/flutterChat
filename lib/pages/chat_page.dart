@@ -10,78 +10,79 @@ class Chatpage extends StatefulWidget {
 }
 
 class _ChatpageState extends State<Chatpage> {
-  List<ChatModel> chatcards = [
-    ChatModel(
-        name: 'Lymeng',
-        icon: 'lib/assets/myprofile.jpg',
-        time: '20:20',
-        currentMessage: 'Hi',
-        isGroup: false),
-    ChatModel(
-        name: 'Chea',
-        icon: 'lib/assets/profile.png',
-        time: '20:20',
-        currentMessage: 'Hi',
-        isGroup: false),
-    ChatModel(
-        name: 'kakada',
-        icon: 'lib/assets/profile.png',
-        time: '20:20',
-        currentMessage: 'Hi',
-        isGroup: false),
-    ChatModel(
-        name: 'Seyha',
-        icon: 'lib/assets/profile.png',
-        time: '20:20',
-        currentMessage: 'Hi',
-        isGroup: false),
-    ChatModel(
-        name: 'Petter',
-        icon: 'lib/assets/profile.png',
-        time: '20:20',
-        currentMessage: 'Hi',
-        isGroup: false),
-    ChatModel(
-        name: 'Petter',
-        icon: 'lib/assets/profile.png',
-        time: '20:20',
-        currentMessage: 'Hi',
-        isGroup: false),
-    ChatModel(
-        name: 'Petter',
-        icon: 'lib/assets/profile.png',
-        time: '20:20',
-        currentMessage: 'Hi',
-        isGroup: false),
-    ChatModel(
-        name: 'Petter',
-        icon: 'lib/assets/profile.png',
-        time: '20:20',
-        currentMessage: 'Hi',
-        isGroup: false),
-    ChatModel(
-        name: 'Petter',
-        icon: 'lib/assets/profile.png',
-        time: '20:20',
-        currentMessage: 'Hi',
-        isGroup: false),
-    ChatModel(
-        name: 'Petter',
-        icon: 'lib/assets/profile.png',
-        time: '20:20',
-        currentMessage: 'Hi',
-        isGroup: false),
-  ];
+  // List<ChatModel> chatcards = [
+  //   ChatModel(
+  //       name: 'Lymeng',
+  //       icon: 'lib/assets/myprofile.jpg',
+  //       time: '20:20',
+  //       currentMessage: 'Hi',
+  //       isGroup: false),
+  //   ChatModel(
+  //       name: 'Chea',
+  //       icon: 'lib/assets/profile.png',
+  //       time: '20:20',
+  //       currentMessage: 'Hi',
+  //       isGroup: false),
+  //   ChatModel(
+  //       name: 'kakada',
+  //       icon: 'lib/assets/profile.png',
+  //       time: '20:20',
+  //       currentMessage: 'Hi',
+  //       isGroup: false),
+  //   ChatModel(
+  //       name: 'Seyha',
+  //       icon: 'lib/assets/profile.png',
+  //       time: '20:20',
+  //       currentMessage: 'Hi',
+  //       isGroup: false),
+  //   ChatModel(
+  //       name: 'Petter',
+  //       icon: 'lib/assets/profile.png',
+  //       time: '20:20',
+  //       currentMessage: 'Hi',
+  //       isGroup: false),
+  //   ChatModel(
+  //       name: 'Petter',
+  //       icon: 'lib/assets/profile.png',
+  //       time: '20:20',
+  //       currentMessage: 'Hi',
+  //       isGroup: false),
+  //   ChatModel(
+  //       name: 'Petter',
+  //       icon: 'lib/assets/profile.png',
+  //       time: '20:20',
+  //       currentMessage: 'Hi',
+  //       isGroup: false),
+  //   ChatModel(
+  //       name: 'Petter',
+  //       icon: 'lib/assets/profile.png',
+  //       time: '20:20',
+  //       currentMessage: 'Hi',
+  //       isGroup: false),
+  //   ChatModel(
+  //       name: 'Petter',
+  //       icon: 'lib/assets/profile.png',
+  //       time: '20:20',
+  //       currentMessage: 'Hi',
+  //       isGroup: false),
+  //   ChatModel(
+  //       name: 'Petter',
+  //       icon: 'lib/assets/profile.png',
+  //       time: '20:20',
+  //       currentMessage: 'Hi',
+  //       isGroup: false),
+  // ];
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: ListView.builder(
-      itemCount: chatcards.length,
-      itemBuilder: (context, index) => Chatcard(
-        chatModel: chatcards[index],
-      ),
-    )
+    return const Scaffold(
+        body:Text("Hello")
+    //      ListView.builder(
+    //   itemCount: chatcards.length,
+    //   itemBuilder: (context, index) => Chatcard(
+    //     chatModel: chatcards[index],
+    //   ),
+    // )
         // children: const [
         //   Chatcard(),
         //   Chatcard(),

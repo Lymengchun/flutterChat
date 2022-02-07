@@ -1,10 +1,15 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:chattah/pages/chat_page.dart';
 import 'package:chattah/pages/user_page.dart';
 import 'package:chattah/screens/drawer_widget.dart';
 import 'package:chattah/auth_screen/FB_login_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'package:http/http.dart' as http;
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key, required this.userObj}) : super(key: key);
@@ -20,72 +25,149 @@ class _HomeScreenState extends State<HomeScreen>
   Color secondaryColor = const Color(0xFF7BDFF2);
   late TabController _controller;
   Map userObj;
+  List users = [];
 
   _HomeScreenState(this.userObj);
   @override
   void initState() {
     super.initState();
+    fetchUser();
     _controller = TabController(length: 2, vsync: this, initialIndex: 0);
+  }
+
+  fetchUser() async {
+    String url = "http://chattahbackend.herokuapp.com/api/";
+    final response = await http.get(
+      Uri.parse(url),
+      headers: {
+        HttpHeaders.contentTypeHeader: "application/json",
+        HttpHeaders.authorizationHeader: "Bearer ${userObj['token']}"
+      },
+    );
+    if (response.statusCode == 200) {
+      var items = jsonDecode(response.body)['response'];
+      print(items);
+
+      for (var i = 0; i <= items.length; i++) {
+        if (items[i]['_id'] == userObj['user']['_id']) {
+          setState(() {
+            items.remove(items[i]);
+            users = items;
+          });
+
+          break;
+        }
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-          title: const Text(
-            'CHAT TAH',
-            style: TextStyle(
-                fontSize: 25, color: Colors.white, fontWeight: FontWeight.bold),
-          ),
-          actions: [
-            IconButton(
-                onPressed: () {},
-                icon: SvgPicture.asset(
-                  'lib/assets/search.svg',
+    return WillPopScope(
+      onWillPop: () async {
+        _showMyDialog(context);
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+            title: const Text(
+              'CHAT TAH',
+              style: TextStyle(
+                  fontSize: 25,
                   color: Colors.white,
-                  width: 150,
-                  height: 150,
-                )),
-            PopupMenuButton<String>(itemBuilder: (BuildContext context) {
-              return [
-                const PopupMenuItem(
-                  child: Text("New Group"),
-                  value: "New Group",
-                ),
-                PopupMenuItem(
-                  onTap: () {},
-                  child: const Text("Profile"),
-                  value: "Profile",
-                ),
-                PopupMenuItem(
-                  child: const Text("Logout"),
-                  value: "Logout",
-                  onTap: () {
-                    FacebookAuth.instance.logOut().then((value) {
-                      Navigator.pop(context);
-                    });
-                  },
-                ),
-              ];
-            }),
-          ],
-          backgroundColor: secondaryColor,
-          bottom: TabBar(
-            controller: _controller,
-            tabs: const [
-              Tab(
-                text: "Chats",
-              ),
-              Tab(text: "Users")
+                  fontWeight: FontWeight.bold),
+            ),
+            actions: [
+              IconButton(
+                  onPressed: () {},
+                  icon: SvgPicture.asset(
+                    'lib/assets/search.svg',
+                    color: Colors.white,
+                    width: 150,
+                    height: 150,
+                  )),
+              PopupMenuButton<String>(itemBuilder: (BuildContext context) {
+                return [
+                  const PopupMenuItem(
+                    child: Text("New Group"),
+                    value: "New Group",
+                  ),
+                  PopupMenuItem(
+                    onTap: () {},
+                    child: const Text("Profile"),
+                    value: "Profile",
+                  ),
+                  PopupMenuItem(
+                    child: const Text("Logout"),
+                    value: "Logout",
+                    onTap: () {
+                      FacebookAuth.instance.logOut().then((value) {
+                        Navigator.pop(context);
+                      });
+                    },
+                  ),
+                ];
+              }),
             ],
-            labelColor: Colors.white,
-            unselectedLabelStyle: const TextStyle(fontSize: 15),
-          )),
-      body: TabBarView(
-        controller: _controller,
-        children: const [Chatpage(), Userpage()],
+            backgroundColor: secondaryColor,
+            bottom: TabBar(
+              controller: _controller,
+              tabs: const [
+                Tab(
+                  text: "Chats",
+                ),
+                Tab(text: "Users")
+              ],
+              labelColor: Colors.white,
+              unselectedLabelStyle: const TextStyle(fontSize: 15),
+            )),
+        body: TabBarView(
+          controller: _controller,
+          children: [
+            const Chatpage(),
+            Userpage(
+              users: users,
+              userObj: userObj,
+            )
+          ],
+        ),
+        drawer: DrawerWidget(
+          userObj: userObj,
+        ),
       ),
-      drawer: const DrawerWidget(),
     );
   }
+}
+
+Future<void> _showMyDialog(BuildContext context) async {
+  return showDialog<void>(
+    context: context,
+    barrierDismissible: false, // user must tap button!
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('CHAT TAH',style: TextStyle(fontWeight: FontWeight.bold),),
+        content: SingleChildScrollView(
+          child: ListBody(
+            children: const <Widget>[
+              Text('Do you want to exit?'),
+            ],
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('Yes'),
+            onPressed: () {
+              SystemNavigator.pop();
+            },
+          ),
+          TextButton(
+            child: const Text('No'),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      );
+    },
+  );
 }

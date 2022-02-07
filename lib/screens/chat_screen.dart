@@ -1,29 +1,40 @@
 import 'package:chattah/auth_screen/FB_login_screen.dart';
+import 'package:chattah/models/message_model.dart';
 import 'package:chattah/screens/own_message_card.dart';
 import 'package:chattah/screens/reply_bubble_card.dart';
 import 'package:flutter/material.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({Key? key, required this.name, required this.icon})
+  const ChatScreen(
+      {Key? key,
+      required this.icon,
+      required this.users,
+      required this.userObj})
       : super(key: key);
-  final String name;
+  final Map userObj;
   final String icon;
+  final Map users;
   @override
   // ignore: no_logic_in_create_state
-  _ChatScreenState createState() => _ChatScreenState(name, icon);
+  _ChatScreenState createState() => _ChatScreenState(icon, users, userObj);
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  String name;
+  Map userObj;
   String icon;
+  Map users;
   String currentMenuItem = 'About';
   bool isLoading = true;
   late IO.Socket socket;
+  bool enabled = true;
 
   final myController = TextEditingController();
 
-  _ChatScreenState(this.name, this.icon);
+  List<MessageModel> messages = [];
+
+  _ChatScreenState(this.icon, this.users, this.userObj);
+
 //init state
   @override
   void initState() {
@@ -47,11 +58,29 @@ class _ChatScreenState extends State<ChatScreen> {
             .disableAutoConnect()
             .build());
     socket.connect();
-    print(socket.connected);
 
-    socket.emit('test', 'Hello world');
+    socket.onConnect((msg) {
+      socket.on("message", (msg){
+        print(msg);
+        setMessage("destination", msg["message"]);
+      });
+    });
 
-    socket.on('test', (data) => print(data));
+    socket.emit('signin', userObj['user']['_id']);
+  }
+
+
+  void sendMessage(String message, String sourceId, String targetId) {
+    setMessage("source", message);
+    socket.emit('message',
+        {"message": message, "sourceId": sourceId, "targetId": targetId});
+  }
+
+  void setMessage(String type, String message){
+     MessageModel messageModel = MessageModel(message: message, type: type);
+     setState(() {
+       messages.add(messageModel);
+     });
   }
 
 //Build screen
@@ -77,32 +106,17 @@ class _ChatScreenState extends State<ChatScreen> {
             width: MediaQuery.of(context).size.width,
             fit: BoxFit.cover,
           ),
-          ListView(
+          ListView.builder(itemCount: messages.length,
+            reverse: true,
             padding: const EdgeInsets.only(bottom: 55),
-            children: const [
-              OwnMessageCard(),
-              ReplyBubbleCard(),
-              OwnMessageCard(),
-              OwnMessageCard(),
-              OwnMessageCard(),
-              OwnMessageCard(),
-              ReplyBubbleCard(),
-              OwnMessageCard(),
-              OwnMessageCard(),
-              ReplyBubbleCard(),
-              OwnMessageCard(),
-              ReplyBubbleCard(),
-              OwnMessageCard(),
-              ReplyBubbleCard(),
-              OwnMessageCard(),
-              OwnMessageCard(),
-              OwnMessageCard(),
-              OwnMessageCard(),
-              ReplyBubbleCard(),
-              OwnMessageCard(),
-              OwnMessageCard(),
-            ],
-          ),
+            itemBuilder: (context, index){
+              if(messages[index].type =="source"){
+                return const OwnMessageCard();
+              }else{
+                return const ReplyBubbleCard();
+              }
+            },
+            ),
           Align(
             alignment: Alignment.bottomCenter,
             child: Row(
@@ -130,17 +144,27 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
 
                 //send button
-                InkWell(
-                  onTap: () {
-                    socket.emit("message", myController.text);
-                    myController.clear();
-                  },
-                  child: const CircleAvatar(
-                    radius: 25,
-                    child: Icon(
-                      Icons.send,
-                      color: Colors.white,
-                      size: 30,
+                AbsorbPointer(
+                  absorbing: !enabled,
+                  child: InkWell(
+                    onTap: () {
+                      // socket.emit("message", myController.text);
+                      if (myController.text.isNotEmpty) {
+                        setState(() {
+                          enabled = true;
+                        });
+                        sendMessage(myController.text, userObj['user']['_id'],
+                          users['_id']);
+                      }
+                       myController.clear();
+                    },
+                    child: const CircleAvatar(
+                      radius: 25,
+                      child: Icon(
+                        Icons.send,
+                        color: Colors.white,
+                        size: 30,
+                      ),
                     ),
                   ),
                 ),
@@ -165,7 +189,7 @@ class _ChatScreenState extends State<ChatScreen> {
               backgroundColor: Colors.white,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(50),
-                child: Image.asset(icon),
+                child: Image.network(icon),
               )),
         ],
       ),
@@ -173,7 +197,7 @@ class _ChatScreenState extends State<ChatScreen> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(name),
+          Text(users['name']),
           const Text(
             "Active",
             style: TextStyle(fontSize: 14),
@@ -194,14 +218,4 @@ class _ChatScreenState extends State<ChatScreen> {
       ],
     );
   }
-
-// // load Data
-//   void _loadData() {
-//     // Delay 2 seconds
-//     Future.delayed(const Duration(seconds: 2)).then((value) {
-//       setState(() {
-//         isLoading = false;
-//       });
-//     });
-//   }
 }
