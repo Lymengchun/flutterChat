@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 class ReplyBubbleCard extends StatelessWidget {
-  const ReplyBubbleCard({Key? key}) : super(key: key);
-
+  const ReplyBubbleCard({Key? key,required this.message,required this.time}) : super(key: key);
+  final String message;
+  final String time;
   @override
   Widget build(BuildContext context) {
     return Align(
@@ -26,11 +27,11 @@ class ReplyBubbleCard extends StatelessWidget {
               const Padding(
                   padding: EdgeInsets.only(
                       top: 20, bottom: 25, left: 10, right: 100)),
-              const Padding(
-                padding: EdgeInsets.all(10.0),
+               Padding(
+                padding: const EdgeInsets.all(10.0),
                 child: Text(
-                  "Hey hello left",
-                  style: TextStyle(
+                  message,
+                  style: const TextStyle(
                       fontSize: 15, color: Color.fromRGBO(1, 11, 65, 0.5)),
                 ),
               ),
@@ -38,15 +39,15 @@ class ReplyBubbleCard extends StatelessWidget {
                 bottom: 1,
                 right: 2,
                 child: Row(
-                  children: const [
+                  children:  [
                     Text(
-                      "20:58",
-                      style: TextStyle(
+                      time,
+                      style: const TextStyle(
                         fontSize: 12,
                         color: Colors.grey,
                       ),
                     ),
-                    Icon(
+                    const Icon(
                       Icons.done_all,
                       color: Colors.grey,
                       size: 12,

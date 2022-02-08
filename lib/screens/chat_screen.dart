@@ -3,6 +3,7 @@ import 'package:chattah/models/message_model.dart';
 import 'package:chattah/screens/own_message_card.dart';
 import 'package:chattah/screens/reply_bubble_card.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class ChatScreen extends StatefulWidget {
@@ -28,8 +29,10 @@ class _ChatScreenState extends State<ChatScreen> {
   bool isLoading = true;
   late IO.Socket socket;
   bool enabled = true;
+  bool _needsScroll = false;
 
   final myController = TextEditingController();
+  final ScrollController _controller = ScrollController();
 
   List<MessageModel> messages = [];
 
@@ -60,7 +63,7 @@ class _ChatScreenState extends State<ChatScreen> {
     socket.connect();
 
     socket.onConnect((msg) {
-      socket.on("message", (msg){
+      socket.on("message", (msg) {
         print(msg);
         setMessage("destination", msg["message"]);
       });
@@ -69,23 +72,31 @@ class _ChatScreenState extends State<ChatScreen> {
     socket.emit('signin', userObj['user']['_id']);
   }
 
-
   void sendMessage(String message, String sourceId, String targetId) {
     setMessage("source", message);
     socket.emit('message',
         {"message": message, "sourceId": sourceId, "targetId": targetId});
   }
 
-  void setMessage(String type, String message){
-     MessageModel messageModel = MessageModel(message: message, type: type);
-     setState(() {
-       messages.add(messageModel);
-     });
+  void setMessage(String type, String message) {
+    MessageModel messageModel = MessageModel(message: message, type: type,time: DateTime.now().toString().substring(10,16));
+    setState(() {
+      messages.add(messageModel);
+    });
+  }
+
+  void scroll() async {
+    _controller.animateTo(_controller.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 200), curve: Curves.easeInOut);
   }
 
 //Build screen
   @override
   Widget build(BuildContext context) {
+    if (_needsScroll) {
+      WidgetsBinding.instance!.addPostFrameCallback((_) => scroll());
+      _needsScroll = false;
+    }
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: appbar,
@@ -98,77 +109,98 @@ class _ChatScreenState extends State<ChatScreen> {
     return Container(
       height: MediaQuery.of(context).size.height,
       width: MediaQuery.of(context).size.width,
-      child: Stack(
+      decoration: const BoxDecoration(
+        image: DecorationImage(image: AssetImage("lib/assets/wallpaper1.jpg"),fit: BoxFit.cover)
+      ),
+      child: Column(
         children: [
-          Image.asset(
-            'lib/assets/wallpaper1.jpg',
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
-            fit: BoxFit.cover,
-          ),
-          ListView.builder(itemCount: messages.length,
-            reverse: true,
-            padding: const EdgeInsets.only(bottom: 55),
-            itemBuilder: (context, index){
-              if(messages[index].type =="source"){
-                return const OwnMessageCard();
-              }else{
-                return const ReplyBubbleCard();
-              }
-            },
+          
+          Expanded(
+            child: ListView.builder(
+              itemCount: messages.length+1,
+              controller: _controller,
+              shrinkWrap: true,
+              // padding: const EdgeInsets.only(bottom: 90),
+              itemBuilder: (context, index) {
+                if(index==messages.length){
+                  return Container(height: 50,);
+                }
+                if (messages[index].type == "source") {
+                  return OwnMessageCard(
+                    message: messages[index].message,
+                    time: messages[index].time,
+                  );
+                } else {
+                  return ReplyBubbleCard(message: messages[index].message,time: messages[index].time,);
+                }
+              },
             ),
+          ),
+
           Align(
             alignment: Alignment.bottomCenter,
-            child: Row(
-              children: [
-                // ignore: sized_box_for_whitespace
-                Container(
-                  width: MediaQuery.of(context).size.width - 55,
-                  child: Card(
-                    margin: const EdgeInsets.only(left: 3, right: 10),
-                    shadowColor: Colors.black12,
-                    child: TextFormField(
-                      decoration: const InputDecoration(
-                        contentPadding: EdgeInsets.only(left: 20),
-                        hintText: "Type a message",
-                        border: InputBorder.none,
+            child: Container(
+              height: 70,
+              child: Row(
+                children: [
+                  // ignore: sized_box_for_whitespace
+                  Container(
+                    width: MediaQuery.of(context).size.width - 55,
+                    child: Card(
+                      margin: const EdgeInsets.only(
+                        left: 3,
+                        right: 10,
                       ),
-                      keyboardType: TextInputType.multiline,
-                      maxLines: 3,
-                      minLines: 1,
-                      controller: myController,
+                      shadowColor: Colors.black12,
+                      child: TextFormField(
+                        decoration: const InputDecoration(
+                          contentPadding: EdgeInsets.only(left: 20),
+                          hintText: "Type a message",
+                          border: InputBorder.none,
+                        ),
+                        keyboardType: TextInputType.multiline,
+                        maxLines: 3,
+                        minLines: 1,
+                        controller: myController,
+                        onTap: () {
+                          setState(() {
+                            scroll();
+                          });
+                        },
+                      ),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20)),
                     ),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20)),
                   ),
-                ),
 
-                //send button
-                AbsorbPointer(
-                  absorbing: !enabled,
-                  child: InkWell(
-                    onTap: () {
-                      // socket.emit("message", myController.text);
-                      if (myController.text.isNotEmpty) {
-                        setState(() {
-                          enabled = true;
-                        });
-                        sendMessage(myController.text, userObj['user']['_id'],
-                          users['_id']);
-                      }
-                       myController.clear();
-                    },
-                    child: const CircleAvatar(
-                      radius: 25,
-                      child: Icon(
-                        Icons.send,
-                        color: Colors.white,
-                        size: 30,
+                  //send button
+                  AbsorbPointer(
+                    absorbing: !enabled,
+                    child: InkWell(
+                      onTap: () {
+                        scroll();
+                        // socket.emit("message", myController.text);
+                        if (myController.text.isNotEmpty) {
+                          setState(() {
+                            enabled = true;
+                          });
+                          sendMessage(myController.text, userObj['user']['_id'],
+                              users['_id']);
+                        }
+                        myController.clear();
+                      },
+                      child: const CircleAvatar(
+                        radius: 25,
+                        child: Icon(
+                          Icons.send,
+                          color: Colors.white,
+                          size: 30,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           )
         ],
