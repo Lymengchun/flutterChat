@@ -26,12 +26,14 @@ class _HomeScreenState extends State<HomeScreen>
   late TabController _controller;
   Map userObj;
   List users = [];
+  List chats = [];
 
   _HomeScreenState(this.userObj);
   @override
   void initState() {
     super.initState();
     fetchUser();
+    // fetchChat();
     _controller = TabController(length: 2, vsync: this, initialIndex: 0);
   }
 
@@ -46,7 +48,7 @@ class _HomeScreenState extends State<HomeScreen>
     );
     if (response.statusCode == 200) {
       var items = jsonDecode(response.body)['response'];
-      print(items);
+      // print('users item:$items');
 
       for (var i = 0; i <= items.length; i++) {
         if (items[i]['_id'] == userObj['user']['_id']) {
@@ -60,6 +62,31 @@ class _HomeScreenState extends State<HomeScreen>
       }
     }
   }
+
+  // fetchChat() async {
+  //   String url = "https://chattahbackend.herokuapp.com/api/chat/getownchat";
+
+  //   final response = await http.post(
+  //     Uri.parse(url),
+  //     headers: {
+  //       HttpHeaders.contentTypeHeader: "application/json",
+  //       HttpHeaders.authorizationHeader: "Bearer ${userObj['token']}"
+  //     },
+  //     body:jsonEncode({
+  //       'sourceId':userObj['user']['_id']
+  //     })
+  //   );
+
+  //   if (response.statusCode == 200) {
+  //     var items = jsonDecode(response.body)['response'];
+  //     // print('items:$items');
+        
+  //     setState(() {
+  //           users = items;
+  //         });
+ 
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -78,25 +105,25 @@ class _HomeScreenState extends State<HomeScreen>
                   fontWeight: FontWeight.bold),
             ),
             actions: [
-              IconButton(
-                  onPressed: () {},
-                  icon: SvgPicture.asset(
-                    'lib/assets/search.svg',
-                    color: Colors.white,
-                    width: 150,
-                    height: 150,
-                  )),
+              // IconButton(
+              //     onPressed: () {},
+              //     icon: SvgPicture.asset(
+              //       'lib/assets/search.svg',
+              //       color: Colors.white,
+              //       width: 150,
+              //       height: 150,
+              //     )),
               PopupMenuButton<String>(itemBuilder: (BuildContext context) {
                 return [
-                  const PopupMenuItem(
-                    child: Text("New Group"),
-                    value: "New Group",
-                  ),
-                  PopupMenuItem(
-                    onTap: () {},
-                    child: const Text("Profile"),
-                    value: "Profile",
-                  ),
+                  // const PopupMenuItem(
+                  //   child: Text("New Group"),
+                  //   value: "New Group",
+                  // ),
+                  // PopupMenuItem(
+                  //   onTap: () {},
+                  //   child: const Text("Profile"),
+                  //   value: "Profile",
+                  // ),
                   PopupMenuItem(
                     child: const Text("Logout"),
                     value: "Logout",
@@ -124,7 +151,7 @@ class _HomeScreenState extends State<HomeScreen>
         body: TabBarView(
           controller: _controller,
           children: [
-            const Chatpage(),
+             const Chatpage(),
             Userpage(
               users: users,
               userObj: userObj,

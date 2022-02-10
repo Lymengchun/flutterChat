@@ -6,6 +6,7 @@ class ChatModel {
   late bool isGroup;
   late String time;
   late String currentMessage;
+  
   ChatModel(responseJson, 
       { required this.name ,
        required this.isGroup ,

@@ -13,16 +13,19 @@ final Map userObj;
   @override
   Widget build(BuildContext context) {
     return Row(
+      
       children: [
         Drawer(
+          backgroundColor: Colors.blue[200],
           child: ListView(
             children: [
               ListTile(
                 leading: CircleAvatar(
                     radius: 25,
-                    backgroundColor: Colors.white,
+                    backgroundColor: Colors.transparent,
                     child: ClipRRect(
-                        child: Image.asset('lib/assets/profile.png'))),
+                      borderRadius: BorderRadius.circular(50),
+                        child: Image.network('https://cdn.dribbble.com/users/1577045/screenshots/4914645/media/028d394ffb00cb7a4b2ef9915a384fd9.png?compress=1&resize=500x500'))),
               ),
                 Padding(
                 padding: const EdgeInsets.only(top: 5, left: 20),

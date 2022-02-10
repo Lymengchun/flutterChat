@@ -1,9 +1,12 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:chattah/auth_screen/FB_login_screen.dart';
 import 'package:chattah/models/message_model.dart';
 import 'package:chattah/screens/own_message_card.dart';
 import 'package:chattah/screens/reply_bubble_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class ChatScreen extends StatefulWidget {
@@ -30,11 +33,16 @@ class _ChatScreenState extends State<ChatScreen> {
   late IO.Socket socket;
   bool enabled = true;
   bool _needsScroll = false;
+  final url = 'https://chattahbackend.herokuapp.com/api/chat/store';
 
   final myController = TextEditingController();
   final ScrollController _controller = ScrollController();
 
+  late Map data;
+  late String message;
+
   List<MessageModel> messages = [];
+
 
   _ChatScreenState(this.icon, this.users, this.userObj);
 
@@ -43,6 +51,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     connect();
     super.initState();
+    getMessage();
   }
 
 //textfield controller
@@ -51,7 +60,6 @@ class _ChatScreenState extends State<ChatScreen> {
     myController.dispose();
     super.dispose();
   }
-
 //Connect socket.io
   void connect() {
     socket = IO.io(
@@ -64,25 +72,90 @@ class _ChatScreenState extends State<ChatScreen> {
 
     socket.onConnect((msg) {
       socket.on("message", (msg) {
-        print(msg);
-        setMessage("destination", msg["message"]);
+        setMessage(msg["sourceId"], msg["message"]);
       });
     });
 
     socket.emit('signin', userObj['user']['_id']);
   }
 
+  void saveChat(
+      String sourceId, String targetId, MessageModel messageModel) async {
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          HttpHeaders.contentTypeHeader: "application/json",
+          HttpHeaders.authorizationHeader: "Bearer ${userObj['token']}"
+        },
+        body: jsonEncode({
+          "sourceId": sourceId,
+          "targetId": targetId,
+          "messages": {
+            "type":messageModel.type,
+            "message":messageModel.message,
+            "time":messageModel.time,
+          }
+        }),
+      );
+      data = json.decode(response.body);
+      print("respon:${data['message']}");
+    } catch (err) {
+      print("errmsg:$err");
+    }
+  }
+
   void sendMessage(String message, String sourceId, String targetId) {
-    setMessage("source", message);
+    setMessage(sourceId, message);
     socket.emit('message',
         {"message": message, "sourceId": sourceId, "targetId": targetId});
+    MessageModel messageModel = MessageModel(
+        message: message,
+        type: sourceId,
+        time: DateTime.now().toString().substring(10, 16));
+    saveChat(sourceId, targetId, messageModel);
   }
 
   void setMessage(String type, String message) {
-    MessageModel messageModel = MessageModel(message: message, type: type,time: DateTime.now().toString().substring(10,16));
+    MessageModel messageModel = MessageModel(
+        message: message,
+        type: type,
+        time: DateTime.now().toString().substring(10, 16));
     setState(() {
       messages.add(messageModel);
     });
+  }
+
+  void getMessage()async{
+    String url = 'https://chattahbackend.herokuapp.com/api/chat/getchat';
+    final response = await http.post(Uri.parse(url),
+    headers: {
+       HttpHeaders.contentTypeHeader: "application/json",
+        HttpHeaders.authorizationHeader: "Bearer ${userObj['token']}"
+    },
+    body: jsonEncode({
+      'sourceId':userObj['user']['_id'],
+      'targetId':users['_id']
+    }),
+    );
+    if(response.statusCode == 200){
+      var items = jsonDecode(response.body)['response'];
+     
+      // print(items);
+      for(var i = 0;i < items.length;i++ ){
+          
+        print(items[i]['message']);
+         MessageModel messageModel = MessageModel(
+        message: items[i]['message'],
+        type: items[i]['type'],
+        time: items[i]['time']);
+        setState(() {
+          messages.add(messageModel);
+        });
+        
+      }
+
+    }
   }
 
   void scroll() async {
@@ -97,6 +170,7 @@ class _ChatScreenState extends State<ChatScreen> {
       WidgetsBinding.instance!.addPostFrameCallback((_) => scroll());
       _needsScroll = false;
     }
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: appbar,
@@ -110,33 +184,37 @@ class _ChatScreenState extends State<ChatScreen> {
       height: MediaQuery.of(context).size.height,
       width: MediaQuery.of(context).size.width,
       decoration: const BoxDecoration(
-        image: DecorationImage(image: AssetImage("lib/assets/wallpaper1.jpg"),fit: BoxFit.cover)
-      ),
+          image: DecorationImage(
+              image: AssetImage("lib/assets/wallpaper1.jpg"),
+              fit: BoxFit.cover)),
       child: Column(
         children: [
-          
           Expanded(
             child: ListView.builder(
-              itemCount: messages.length+1,
+              itemCount: messages.length + 1,
               controller: _controller,
               shrinkWrap: true,
               // padding: const EdgeInsets.only(bottom: 90),
               itemBuilder: (context, index) {
-                if(index==messages.length){
-                  return Container(height: 50,);
+                if (index == messages.length) {
+                  return Container(
+                    height: 50,
+                  );
                 }
-                if (messages[index].type == "source") {
+                if (messages[index].type == userObj['user']['_id']) {
                   return OwnMessageCard(
                     message: messages[index].message,
                     time: messages[index].time,
                   );
                 } else {
-                  return ReplyBubbleCard(message: messages[index].message,time: messages[index].time,);
+                  return ReplyBubbleCard(
+                    message: messages[index].message,
+                    time: messages[index].time,
+                  );
                 }
               },
             ),
           ),
-
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(

@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
           textTheme: const TextTheme(
               bodyText1: TextStyle(fontSize: 12, color: Color(0xFFEFF7F6)))),
       home: const SignInEmail(),
-      debugShowCheckedModeBanner: true,
+      debugShowCheckedModeBanner: false,
     );
   }
 }
