@@ -105,10 +105,11 @@ class _SignupEmailState extends State<SignupEmail> {
               title: Image.asset(
                 'lib/assets/Appco__1_-removebg-preview.png',
                 scale: 2.6,
+                color: Colors.white,
               ),
               centerTitle: true,
               toolbarHeight: 180,
-              backgroundColor: const Color(0xFF7BDFF2),
+              backgroundColor: const Color(0xFF010B41),
               shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.only(bottomRight: Radius.circular(100))),
             ),
@@ -267,7 +268,7 @@ class _SignupEmailState extends State<SignupEmail> {
               child: Container(
                 height: 70,
                 decoration: const BoxDecoration(
-                    color: Color(0xFF7BDFF2),
+                    color: Color(0xFF010B41),
                     borderRadius: BorderRadius.only(topLeft: Radius.circular(150))),
               ),
             ),

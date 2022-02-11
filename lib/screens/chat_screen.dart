@@ -6,6 +6,7 @@ import 'package:chattah/screens/own_message_card.dart';
 import 'package:chattah/screens/reply_bubble_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:http/http.dart' as http;
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
@@ -42,6 +43,7 @@ class _ChatScreenState extends State<ChatScreen> {
   late String message;
 
   List<MessageModel> messages = [];
+  bool isloading = true;
 
 
   _ChatScreenState(this.icon, this.users, this.userObj);
@@ -139,6 +141,9 @@ class _ChatScreenState extends State<ChatScreen> {
     }),
     );
     if(response.statusCode == 200){
+      setState(() {
+        isloading = false;
+      });
       var items = jsonDecode(response.body)['response'];
      
       // print(items);
@@ -153,7 +158,10 @@ class _ChatScreenState extends State<ChatScreen> {
           messages.add(messageModel);
         });
         
+        
       }
+
+     
 
     }
   }
@@ -174,7 +182,20 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: appbar,
-      body: chatscreen,
+      body: Stack(
+        children: [
+          chatscreen,isloading
+              ? Container(
+                
+                color: Colors.transparent,
+                child: const SpinKitWave(
+                    color: Colors.white,
+                    size: 50,
+                  ),
+              )
+              : Container(),
+        ],
+      ),
     );
   }
 
@@ -212,7 +233,9 @@ class _ChatScreenState extends State<ChatScreen> {
                     time: messages[index].time,
                   );
                 }
+                
               },
+              
             ),
           ),
           Align(
@@ -268,11 +291,12 @@ class _ChatScreenState extends State<ChatScreen> {
                         myController.clear();
                       },
                       child: const CircleAvatar(
+                        backgroundColor: Color(0xFF010B41),
                         radius: 25,
                         child: Icon(
                           Icons.send,
                           color: Colors.white,
-                          size: 30,
+                          size: 20,
                         ),
                       ),
                     ),
@@ -288,14 +312,14 @@ class _ChatScreenState extends State<ChatScreen> {
 
   AppBar get appbar {
     return AppBar(
-      backgroundColor: Colors.blue[200],
+      backgroundColor: Color(0xFF010B41),
       leadingWidth: 80,
       titleSpacing: 1,
       leading: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           CircleAvatar(
-              radius: 25,
+              radius: 20,
               backgroundColor: Colors.white,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(50),
@@ -314,18 +338,18 @@ class _ChatScreenState extends State<ChatScreen> {
           )
         ],
       ),
-      actions: [
-        PopupMenuButton<String>(
-            onSelected: (value) {},
-            itemBuilder: (BuildContext contesxt) {
-              return [
-                const PopupMenuItem(
-                  child: Text("Delete chat"),
-                  value: "Delete chat",
-                ),
-              ];
-            })
-      ],
+      // actions: [
+      //   PopupMenuButton<String>(
+      //       onSelected: (value) {},
+      //       itemBuilder: (BuildContext contesxt) {
+      //         return [
+      //           const PopupMenuItem(
+      //             child: Text("Delete chat"),
+      //             value: "Delete chat",
+      //           ),
+      //         ];
+      //       })
+      // ],
     );
   }
 }

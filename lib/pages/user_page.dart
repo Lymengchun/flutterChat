@@ -72,11 +72,11 @@ class _UserpageState extends State<Userpage> {
                   'https://cdn.dribbble.com/users/1577045/screenshots/4914645/media/028d394ffb00cb7a4b2ef9915a384fd9.png?compress=1&resize=400x300'),
             )),
         title: Text(
-          name,
+          name,style: const TextStyle(color: Colors.white,fontWeight: FontWeight.bold),
         ),
-        subtitle: Text(email),
+        subtitle: Text(email,style: const TextStyle(color: Colors.white)),
         trailing: const Text(""),
-        tileColor: Colors.cyan,
+        tileColor: const Color(0xFF010B41),
         onTap: () {
           Navigator.push(
               context,

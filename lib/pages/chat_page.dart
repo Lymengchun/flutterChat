@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 
 class Chatpage extends StatefulWidget {
@@ -11,7 +12,7 @@ class Chatpage extends StatefulWidget {
 }
 
 class _ChatpageState extends State<Chatpage> {
- 
+ bool isloading = true;
 
   @override
   void initState() {
@@ -20,8 +21,22 @@ class _ChatpageState extends State<Chatpage> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-        body:Text('coming soon...'));
+    return Stack(
+      children: [
+        const Scaffold(
+            body:Text('coming soon...')),
+            isloading
+              ? Container(
+                
+                color: Colors.white,
+                child: const SpinKitSquareCircle(
+                    color: Color(0xFF010B41),
+                    size: 50,
+                  ),
+              )
+              : Container(),
+      ],
+    );
   }
 
 

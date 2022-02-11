@@ -16,7 +16,7 @@ final Map userObj;
       
       children: [
         Drawer(
-          backgroundColor: Colors.blue[200],
+          backgroundColor: Color(0xFF010B41),
           child: ListView(
             children: [
               ListTile(
@@ -31,19 +31,20 @@ final Map userObj;
                 padding: const EdgeInsets.only(top: 5, left: 20),
                 child: Text(
                   userObj['user']['name'],
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold,color: Colors.amberAccent),
                 ),
               ),
                Padding(
                 padding: const EdgeInsets.only(left: 20, bottom: 10),
                 child: Text(
                   userObj['user']['email'],
-                  style:const TextStyle(color: Colors.black54),
+                  style:const TextStyle(color: Colors.amber),
                 ),
               ),
               const Divider(
                 height: 1,
                 thickness: 1,
+                color: Colors.amber,
               )
             ],
           ),

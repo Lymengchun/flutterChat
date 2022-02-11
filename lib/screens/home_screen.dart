@@ -22,7 +22,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
   Color primaryColor = const Color(0xFF010B41);
-  Color secondaryColor = const Color(0xFF7BDFF2);
+  Color secondaryColor = const Color.fromARGB(255, 56, 1, 144);
   late TabController _controller;
   Map userObj;
   List users = [];
@@ -97,6 +97,7 @@ class _HomeScreenState extends State<HomeScreen>
       },
       child: Scaffold(
         appBar: AppBar(
+          
             title: const Text(
               'CHAT TAH',
               style: TextStyle(
@@ -136,7 +137,7 @@ class _HomeScreenState extends State<HomeScreen>
                 ];
               }),
             ],
-            backgroundColor: secondaryColor,
+            backgroundColor: primaryColor,
             bottom: TabBar(
               controller: _controller,
               tabs: const [
